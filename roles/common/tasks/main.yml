@@ -1,0 +1,4 @@
+---
+# file: roles/common/tasks/main.yml
+
+- include: roles/common/tasks/remote-ssh-access.yml
