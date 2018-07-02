@@ -17,9 +17,6 @@
     update_cache: true
   notify:
    - Start Openssh
-- name: Get current username
-  local_action: command whoami
-  register: local_username
 - name: Create ssh key
   user:
     name: "{{ local_username }}"
@@ -36,5 +33,6 @@
   become: yes
   become_user: "{{ local_username }}"
   cron:
+    name: SSH Tunnel Monitor
     minute: "*/5"
     job: /usr/local/bin/remote-ssh.sh "{{ remote_host_name }}" "{{ remote_port_number }}"
