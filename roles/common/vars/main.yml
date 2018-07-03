@@ -1,7 +1,8 @@
 ---
 # file: roles/common/vars/main.yml
-remote_user_name: cstras-remote
+local_user_name: "{{ ansible_user_id }}"
+remote_user_name:
 remote_user_pass: "{{ vault_remote_user_pass }}"
 ssh_key_bits: 2048
 remote_port_number: 11922
-remote_host_name: www.semantiknit.com
+remote_host_name:

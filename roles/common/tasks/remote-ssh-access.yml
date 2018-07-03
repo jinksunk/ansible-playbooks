@@ -17,12 +17,9 @@
     update_cache: true
   notify:
    - Start Openssh
-- name: Get current username
-  local_action: command whoami
-  register: local_username
 - name: Create ssh key
   user:
-    name: "{{ local_username }}"
+    name: "{{ local_user_name }}"
     generate_ssh_key: yes        # Will not overwrite if already present
 - name: Add ssh remote tunnel cron file
   become: yes
@@ -30,11 +27,12 @@
   copy:
     src: remote-ssh.sh
     dest: /usr/local/bin/remote-ssh.sh
-    owner: "{{ local_username }}"
+    owner: "{{ local_user_name }}"
     mode: u=rx,g=rx,o=rx
 - name: Add cron job to check tunnel every 5 minutes
   become: yes
-  become_user: "{{ local_username }}"
+  become_user: "{{ local_user_name }}"
   cron:
-    minute: */5
+    name: SSH Tunnel Monitor
+    minute: "*/5"
     job: /usr/local/bin/remote-ssh.sh "{{ remote_host_name }}" "{{ remote_port_number }}"

@@ -37,5 +37,8 @@ $ ansible-vault edit group_vars/vault
 vault_remote_user_pass: "<PASS_FOR_USER>" # Password for remote user used
                                           # for remote ansible setup.
 ```
-
+6. Run the play:
+```
+$ ansible-playbook -i hosts site.yml --connection=local --ask-vault-pass
+```
 
