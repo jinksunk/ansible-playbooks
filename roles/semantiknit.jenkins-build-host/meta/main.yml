@@ -1,0 +1,5 @@
+dependencies:
+  - role: geerlingguy.apache
+  - role: geerlingguy.java
+  - role: semantiknit.pellet
+  - role: geerlingguy.jenkins

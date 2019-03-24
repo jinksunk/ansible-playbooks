@@ -1,0 +1,6 @@
+- name: install personal-organization
+  hosts: "{{ hosts | default('personal-organization')"
+  serial: "{{ serial | default(99999) }}"
+
+  roles:
+    - semantiknit.personal-organization

@@ -1,0 +1,11 @@
+- name: Get tarball
+  register: latest.tar.gz
+
+- name: Unpack to target location
+  src: "{{ tarball_source }}"
+  dest: "{{ tarball_destination }}"
+  group: "{{ owning_group }}"
+  owner: "{{ owning_user }}"
+  mode: "{{ tarball_mode }}"
+
+- name: Set symlinks, etc...

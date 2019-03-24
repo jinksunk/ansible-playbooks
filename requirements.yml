@@ -3,3 +3,5 @@
   version: "1.9.5"
 - src: geerlingguy.apache
   version: "3.0.3"
+- src: geerlingguy.jenkins
+  version: "3.7.0"

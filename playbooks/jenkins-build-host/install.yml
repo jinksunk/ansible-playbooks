@@ -1,0 +1,6 @@
+- name: install jenkins
+  hosts: "{{ hosts | default('jenkins-build-host')"
+  serial: "{{ serial | default(99999) }}"
+
+  roles:
+    - semantiknit.jenkins-build-host
