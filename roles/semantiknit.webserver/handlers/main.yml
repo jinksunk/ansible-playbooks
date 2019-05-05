@@ -1,0 +1,9 @@
+---
+# file: roles/common/handlers/main.yml
+
+- name: Start Openssh
+  become: yes
+  become_user: root
+  service:
+    name: sshd
+    state: started

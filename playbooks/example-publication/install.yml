@@ -1,0 +1,5 @@
+---
+- hosts: "{{ hosts | default(publicationservers) }}"
+  roles:
+    - common
+    - semantiknit.example-publication

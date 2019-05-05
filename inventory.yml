@@ -1,0 +1,15 @@
+---
+all:
+  children:
+    deployhere:
+      children:
+        publicationservers:
+          hosts:
+            www.semantiknit.com
+    deployexternal:
+        webservers:
+          hosts:
+            www.semantiknit.com
+        vpnservers:
+          hosts:
+            www.semantiknit.com

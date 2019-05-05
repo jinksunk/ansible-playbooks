@@ -1,0 +1,7 @@
+---
+# file: deployexternal.yml
+# List of playbooks that have an external deploy triggers
+- hosts: publicationservers
+  roles:
+    - common
+# - semantiknit.publicationserver
