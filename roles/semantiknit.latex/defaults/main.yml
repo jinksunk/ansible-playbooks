@@ -1,2 +1,4 @@
 ---
 texlive_packages: []
+texlive_distro: latex-recommended
+texlive_version: 2017.20180305-1

@@ -1,2 +1,10 @@
 ---
+- name: Install texlive package
+  apt:
+    name: "texlive-{{ texlive_distro }}"
+    default_release: "{{ texlive_version }}"
 
+- name: Install additional texlive packages
+  command: tlmgr install "{{ item }}"
+  become: true
+  with_items: "{{ texlive_packages }}"

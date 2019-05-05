@@ -1,0 +1,10 @@
+\documentclass[12pt]{article}
+\usepackage{todo}
+\begin{document}
+
+\section*{Notes for My Paper}
+
+Don't forget to include examples of topicalization.
+\todo{Add examples...} They look like this:
+
+\end{document}
