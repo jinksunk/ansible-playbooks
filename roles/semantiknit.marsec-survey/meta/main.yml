@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: semantiknit.latex
+    texlive_packages: "{{ marsec_survey_texlive_packages }}"
+
+
