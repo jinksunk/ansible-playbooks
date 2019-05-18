@@ -1,0 +1,6 @@
+---
+dependencies:
+  - role: semantiknit.latex
+    texlive_packages: "{{ example_publication_texlive_packages }}"
+
+
