@@ -1,0 +1,19 @@
+---
+- name: Install texlive package
+  apt:
+    name: "{{ texlive_apt_packages }}"
+    update_cache: yes
+  become: yes
+
+- name: Initialize tlmgr user tree
+  command: tlmgr init-usertree
+  ignore_errors: True                # Skip error if already exists.
+
+- name: Set tlmgr release version
+  command: tlmgr option repository ftp://ftp.math.utah.edu/pub/tex/historic/systems/texlive/2017/tlnet-final
+
+# command: tlmgr option repository ftp://tug.org/historic/systems/texlive/2017/tlnet-final
+
+- name: Install additional texlive packages
+  command: tlmgr install "{{ item }}" --no-require-verification --no-verify-downloads
+  with_items: "{{ texlive_packages }}"

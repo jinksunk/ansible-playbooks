@@ -1,5 +1,4 @@
 ---
 # file: site.yml
-- hosts: localhost
-  roles:
-    - common
+- import_playbook: playbooks/deployhere.yml
+- import_playbook: playbooks/deployexternal.yml

@@ -1,0 +1,24 @@
+---
+- name: Create target folder
+  file:
+    path: "{{ example_publication_target_folder }}"
+    state: directory
+    owner: "{{ example_publication_path_owner }}"
+    group: "{{ example_publication_path_group }}"
+  become: yes
+
+- name: Create distribution folder
+  file:
+    path: "{{ distdir }}"
+    state: directory
+
+- name: Compile sample file to pdf
+  command: "pdflatex --output-directory={{ distdir }} {{ sourcedir }}/document.tex"
+
+- name: Copy file to destination
+  copy:
+    src: "{{ distdir }}/document.pdf"
+    dest: "{{ example_publication_target_folder }}"
+    owner: "{{ example_publication_path_owner }}"
+    group: "{{ example_publication_path_group }}"
+  become: yes

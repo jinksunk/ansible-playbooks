@@ -1,0 +1,22 @@
+---
+all:
+  vars:
+    sourcedir: "{{ workingdir }}/src"
+    distdir: "{{ workingdir }}/dist"
+  children:
+    deployhere:
+      children:
+        publicationservers:
+          hosts:
+            www.semantiknit.com
+          vars:
+            publication_site: www.semantiknit.com
+            publication_path: "/var/{{ publication_site }}/publications"
+    deployexternal:
+      children:
+        webservers:
+          hosts:
+            www.semantiknit.com
+        vpnservers:
+          hosts:
+            www.semantiknit.com
