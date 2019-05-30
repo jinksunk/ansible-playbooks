@@ -1,0 +1,4 @@
+---
+# file: deployhere.yml
+# List of playbooks that don't have an external deploy trigger
+- import_playbook: publicationserver.yml

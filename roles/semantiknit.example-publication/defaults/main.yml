@@ -1,0 +1,8 @@
+---
+example_publication_texlive_packages:
+  - todo
+  - tree-dvips
+
+example_publication_path_owner: www-data
+example_publication_path_group: www-data
+example_publication_target_folder: "{{ publication_path }}/example-publication"

@@ -1,0 +1,6 @@
+---
+# file: roles/common/tasks/main.yml
+# For a webserver, we need to include a role to install the server software,
+# configure the software, and set ownership / permissions to serve content.
+
+- include: roles/common/tasks/remote-ssh-access.yml

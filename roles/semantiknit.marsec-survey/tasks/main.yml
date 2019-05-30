@@ -1,0 +1,24 @@
+---
+- name: Create target folder
+  file:
+    path: "{{ marsec_survey_target_folder }}"
+    state: directory
+    owner: "{{ marsec_survey_path_owner }}"
+    group: "{{ marsec_survey_path_group }}"
+  become: yes
+
+- name: Create distribution folder
+  file:
+    path: "{{ distdir }}"
+    state: directory
+
+- name: Compile file to pdf
+  command: "pdflatex --output-directory={{ distdir }} {{ sourcedir }}/document.tex"
+
+- name: Copy file to destination
+  copy:
+    src: "{{ distdir }}/document.pdf"
+    dest: "{{ marsec_survey_target_folder }}"
+    owner: "{{ marsec_survey_path_owner }}"
+    group: "{{ marsec_survey_path_group }}"
+  become: yes
