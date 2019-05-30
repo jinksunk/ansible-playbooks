@@ -1,0 +1,5 @@
+---
+marsec_survey_texlive_packages: []
+marsec_survey_path_owner: www-data
+marsec_survey_path_group: www-data
+marsec_survey_target_folder: "{{ publication_path }}/marsec-survey"
