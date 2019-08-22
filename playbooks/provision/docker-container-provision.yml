@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: True
+  vars:
+    _image_base: "{{ ec2_availability_zone | default(ec2_default_az) }}"
+    _docker_host: "{{ docker_host | default('unix://var/run/docker.sock') }}"
+    _dockerfile_path: "{{ dockerfile_path }}"
+    _name: "{{ docker_image_name }}"
+    _base_name: "{{ docker_base_image_name | default('') }}"
+
+  tasks:
+  - name: Build an image
+    docker_image:
+      path: "{{ _dockerfile_path }}"
+      name: "{{ _name }}"

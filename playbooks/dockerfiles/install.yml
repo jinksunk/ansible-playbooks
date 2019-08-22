@@ -1,0 +1,111 @@
+---
+- hosts: "{{ hosts | default('dockerhosts') }}"
+  gather_facts: True
+
+  tasks:
+
+    - name: Render dockerfile from template
+      template:
+        src: "{{ docker_template_file }}"
+        dest: "{{ docker_dockerfile_path }}/Dockerfile"
+        mode: 0775
+      when: docker_template_file is defined
+
+    - name: Create image from dockerfile
+      shell: |
+        docker build \
+        --force-rm \
+        --tag "build_{{ docker_image_name }}:{{ docker_image_tag }}" \
+        "{{ docker_dockerfile_path }}"
+
+    - name: Run docker image for additional configuration
+      command:
+        argv:
+          - docker
+          - run
+          - --name=build_tmp
+          - --publish-all=true
+          - --detach
+          - "build_{{ docker_image_name }}:{{ docker_image_tag }}"
+      register: build_image_id
+
+    - name: Get exposed port on localhost
+      command:
+        argv:
+          - docker
+          - port
+          - "{{ build_image_id.stdout }}"
+          - "22"
+      register: build_image_ssh_port
+
+    - name: Add host to hosts list to process
+      add_host:
+        name: "127.0.0.1:{{ build_image_ssh_port.stdout.split(':')[1] }}"
+        groups: just_created
+
+
+- hosts: "just_created"
+  gather_facts: False
+  vars:
+    ansible_user: sk_deploy
+    nginx_default_site_config: /etc/nginx/sites-available/default
+    nginx_web_root: /var/www/html
+
+  roles:
+    - semantiknit.example-webpage
+
+- hosts: "{{ hosts | default('dockerhosts') }}"
+  gather_facts: false
+
+  tasks:
+    - name: create a docker image from the container
+      command:
+        argv:
+          - docker
+          - commit
+          - -c
+          - EXPOSE 22 80 443
+          - -c
+          - CMD nginx && /usr/sbin/sshd -D
+          - build_tmp
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+
+    - name: stop build container
+      command:
+        argv:
+          - docker
+          - stop
+          - build_tmp
+
+    - name: remove build container
+      command:
+        argv:
+          - docker
+          - rm
+          - build_tmp
+
+    - name: run new image for testing
+      command:
+        argv:
+          - docker
+          - run
+          - --name=validate_tmp
+          - --publish-all=true
+          - --detach
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+      register: validate_image_id
+
+    - name: stop validation container
+      command:
+        argv:
+          - docker
+          - stop
+          - validate_tmp
+
+    - name: remove validation container
+      command:
+        argv:
+          - docker
+          - rm
+          - validate_tmp
+

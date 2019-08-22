@@ -1,0 +1,19 @@
+---
+- name: Install nginx site config
+  template:
+    src: hello_world.j2
+    dest: "{{ nginx_default_site_config }}"
+  become: true
+  notify: reload nginx config
+
+- name: Ensures health check dir exists
+  file:
+    path: "{{ nginx_web_root }}/health"
+    state: directory
+  become: true
+
+- name: Install web file(s)
+  template:
+    src: hello_world.html.j2
+    dest: "{{ nginx_web_root }}/health/hello_world.html"
+  become: true

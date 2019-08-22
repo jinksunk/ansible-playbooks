@@ -3,9 +3,22 @@ all:
   vars:
     sourcedir: "{{ workingdir }}/src"
     distdir: "{{ workingdir }}/dist"
+    deploy_user_authorized: "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDHiMfcUCFBzcxHHtINM7vUd/r5EKnE3KB5cdP/wyyzS26Xn8c1pV7IwYs9zkyt+zUpMXVe5vVnrGn/wDxZ9MtyleixQ+ta/oTm01mbL5OFPZPEaoVSyVM36iXq3SJRw6ZyEcbrov1XKdnTiWkPpj7v5QCGYV5ZuRjTdwsBgngbAKgWPZgZN3RCJRZzAcNZG2uCLEx29hHDyEn/cXeYT4h8hr2QbYOD2CBg5TrEmc8XExGyUO92Cms1t7yRVdOcvQooEhUSIn11F4jTekRCn8k1qhTNB96YyBAq9jt1SrB8EWUgEDuc2qI1+4U+Y4hcwv52xyUzv9czJBCBf+StONl1 jenkins@www.semantiknit.com"
+    deploy_user_gecos: "'Deploy User'"
+    deploy_user_name: "sk_deploy"
+    deploy_user_home: "/home/{{ deploy_user_name }}"
   children:
     deployhere:
       children:
+        dockerhosts:
+          hosts:
+            www.semantiknit.com
+          vars:
+            dockerfile_base_path: "{{ sourcedir }}"
+            docker_image_name: "semantiknit_base"
+            docker_image_tag: "{{ git_commit_id | default( 'no_commit_id' ) }}"
+            docker_template_file: "{{ dockerfile_base_path }}/{{ docker_image_name }}/Dockerfile.j2"
+            docker_dockerfile_path: "{{ dockerfile_base_path }}/{{ docker_image_name }}"
         publicationservers:
           hosts:
             www.semantiknit.com
