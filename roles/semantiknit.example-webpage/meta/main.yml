@@ -1,0 +1,4 @@
+---
+dependencies:
+  - role: semantiknit.nginx
+    texlive_packages: "{{ example_publication_texlive_packages }}"
