@@ -1,8 +1,23 @@
 ---
 - hosts: "{{ hosts | default('dockerhosts') }}"
   gather_facts: True
+  vars:
+    _docker_image_name: base_docker_image
+    image_tags: []
 
   tasks:
+    - name: Share derived variables
+      set_fact:
+        docker_image_name: "{{ _docker_image_name }}"
+        image_tags: "{{ git_branch_name.startswith('feature') | ternary( image_tags | union ( ['unstable'] ), image_tags ) }}"
+
+    - name: Check for develop
+      set_fact:
+        image_tags: "{{ (git_branch_name == 'develop') | ternary( image_tags | union ( ['latest'] ), image_tags ) }}"
+
+    - name: Check for master
+      set_fact:
+        image_tags: "{{ (git_branch_name == 'master') | ternary( image_tags | union ( ['release'] ), image_tags ) }}"
 
     - name: Render dockerfile from template
       template:
@@ -48,11 +63,9 @@
   gather_facts: False
   vars:
     ansible_user: sk_deploy
-    nginx_default_site_config: /etc/nginx/sites-available/default
-    nginx_web_root: /var/www/html
 
   roles:
-    - semantiknit.example-webpage
+    - semantiknit.base-docker-image
 
 - hosts: "{{ hosts | default('dockerhosts') }}"
   gather_facts: false
@@ -64,9 +77,9 @@
           - docker
           - commit
           - -c
-          - EXPOSE 22 80 443
+          - EXPOSE 22
           - -c
-          - CMD nginx && /usr/sbin/sshd -D
+          - CMD /usr/sbin/sshd -D
           - build_tmp
           - "{{ docker_image_name }}:{{ docker_image_tag }}"
 
@@ -84,28 +97,18 @@
           - rm
           - build_tmp
 
-    - name: run new image for testing
-      command:
-        argv:
-          - docker
-          - run
-          - --name=validate_tmp
-          - --publish-all=true
-          - --detach
-          - "{{ docker_image_name }}:{{ docker_image_tag }}"
-      register: validate_image_id
+    - name: Remove existing tagged images if exist
+      shell: |
+        docker image rm \
+        "{{ docker_image_name }}:{{ item }}"
+      ignore_errors: yes
+      with_items: "{{ image_tags }}"
 
-    - name: stop validation container
-      command:
-        argv:
-          - docker
-          - stop
-          - validate_tmp
+    - name: Add additional tags to image
+      shell: |
+        docker tag \
+        "{{ docker_image_name }}:{{ docker_image_tag }}" \
+        "{{ docker_image_name }}:{{ item }}"
+      with_items: "{{ image_tags }}"
 
-    - name: remove validation container
-      command:
-        argv:
-          - docker
-          - rm
-          - validate_tmp
 

@@ -1,7 +1,7 @@
 ---
 - name: Install nginx site config
   template:
-    src: hello_world.j2
+    src: "hello_world.j2"
     dest: "{{ nginx_default_site_config }}"
   become: true
   notify: reload nginx config
@@ -14,6 +14,6 @@
 
 - name: Install web file(s)
   template:
-    src: hello_world.html.j2
+    src: "{{ sourcedir }}/hello_world.html.j2"
     dest: "{{ nginx_web_root }}/health/hello_world.html"
   become: true

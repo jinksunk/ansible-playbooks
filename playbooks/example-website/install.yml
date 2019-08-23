@@ -1,0 +1,103 @@
+---
+- hosts: "{{ hosts | default('dockerhosts') }}"
+  gather_facts: True
+  vars:
+    _base_image_name: "{{ base_image_name | default( 'base_docker_image' ) }}"
+    _base_image_tag: "{{ base_image_tag | default( 'release' ) }}"
+    _docker_image_name: example_website
+    image_tags: []
+
+  tasks:
+
+    - name: Share derived variables
+      set_fact:
+        docker_image_name: "{{ _docker_image_name }}"
+        image_tags: "{{ git_branch_name.startswith('feature') | ternary( image_tags | union ( ['unstable'] ), image_tags ) }}"
+
+    - name: Check for develop
+      set_fact:
+        image_tags: "{{ (git_branch_name == 'develop') | ternary( image_tags | union ( ['latest'] ), image_tags ) }}"
+
+    - name: Check for master
+      set_fact:
+        image_tags: "{{ (git_branch_name == 'master') | ternary( image_tags | union ( ['release'] ), image_tags ) }}"
+
+    - name: Run docker image for build
+      command:
+        argv:
+          - docker
+          - run
+          - "--name=build_{{ docker_image_name }}"
+          - --publish-all=true
+          - --detach
+          - "{{ _base_image_name }}:{{ _base_image_tag }}"
+      register: build_image_id
+
+    - name: Get exposed port on localhost
+      command:
+        argv:
+          - docker
+          - port
+          - "{{ build_image_id.stdout }}"
+          - "22"
+      register: build_image_ssh_port
+
+    - name: Add host to hosts list to process
+      add_host:
+        name: "127.0.0.1:{{ build_image_ssh_port.stdout.split(':')[1] }}"
+        groups: just_created
+
+
+- hosts: "just_created"
+  gather_facts: False
+  vars:
+    ansible_user: sk_deploy
+
+  roles:
+    - semantiknit.example-website
+
+- hosts: "{{ hosts | default('dockerhosts') }}"
+  gather_facts: false
+
+  tasks:
+    - name: create a docker image from the container
+      command:
+        argv:
+          - docker
+          - commit
+          - -c
+          - EXPOSE 22 80 443
+          - -c
+          - CMD nginx && /usr/sbin/sshd -D
+          - "build_{{ docker_image_name }}"
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+
+    - name: stop build container
+      command:
+        argv:
+          - docker
+          - stop
+          - "build_{{ docker_image_name }}"
+
+    - name: remove build container
+      command:
+        argv:
+          - docker
+          - rm
+          - "build_{{ docker_image_name }}"
+
+    - name: Remove existing tagged images if exist
+      shell: |
+        docker image rm \
+        "{{ docker_image_name }}:{{ item }}"
+      ignore_errors: yes
+      with_items: "{{ image_tags }}"
+
+    - name: Add additional tags to image
+      shell: |
+        docker tag \
+        "{{ docker_image_name }}:{{ docker_image_tag }}" \
+        "{{ docker_image_name }}:{{ item }}"
+      with_items: "{{ image_tags }}"
+
+

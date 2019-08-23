@@ -15,10 +15,9 @@ all:
             www.semantiknit.com
           vars:
             dockerfile_base_path: "{{ sourcedir }}"
-            docker_image_name: "semantiknit_base"
             docker_image_tag: "{{ git_commit_id | default( 'no_commit_id' ) }}"
-            docker_template_file: "{{ dockerfile_base_path }}/{{ docker_image_name }}/Dockerfile.j2"
-            docker_dockerfile_path: "{{ dockerfile_base_path }}/{{ docker_image_name }}"
+            docker_template_file: "{{ sourcedir }}/Dockerfile.j2"
+            docker_dockerfile_path: "{{ sourcedir }}"
         publicationservers:
           hosts:
             www.semantiknit.com
