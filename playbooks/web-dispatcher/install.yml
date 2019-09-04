@@ -1,0 +1,6 @@
+---
+- hosts: "{{ hosts | default('webdispatchers') }}"
+  gather_facts: True
+
+  roles:
+    - semantiknit.web-dispatcher

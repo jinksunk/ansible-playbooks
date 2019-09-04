@@ -1,0 +1,18 @@
+# envvars - default environment variables for apache2ctl
+unset HOME
+if [ "${APACHE_CONFDIR##{{ web_dispatcher_conf_base }}-}" != "${APACHE_CONFDIR}" ] ; then
+	SUFFIX="-${APACHE_CONFDIR##{{ web_dispatcher_conf_base }}-}"
+else
+	SUFFIX=
+fi
+
+export APACHE_RUN_USER={{ web_dispatcher_run_user }}
+export APACHE_RUN_GROUP={{ web_dispatcher_run_group }}
+export APACHE_PID_FILE=/var/run/apache2/apache2$SUFFIX.pid
+export APACHE_RUN_DIR=/var/run/apache2$SUFFIX
+export APACHE_LOCK_DIR=/var/lock/apache2$SUFFIX
+# Only /var/log/apache2 is handled by /etc/logrotate.d/apache2.
+export APACHE_LOG_DIR=/var/log/apache2$SUFFIX
+
+export LANG=C
+export LANG

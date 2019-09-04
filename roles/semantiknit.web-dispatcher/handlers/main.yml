@@ -1,0 +1,4 @@
+---
+- name: reload apache2 config
+  service: name=apache2 state=reloaded
+  become: true
