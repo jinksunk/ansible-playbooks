@@ -1,0 +1,28 @@
+---
+- name: Create target folders
+  file:
+    path: "{{ web_dispatcher_conf_base }}/{{ item.path }}"
+    state: directory
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates/
+  become: true
+  notify: reload apache2 config
+  when: item.state == 'directory'
+
+- name: Template config files
+  template:
+    src: "{{ item.path }}"
+    dest: "{{ web_dispatcher_conf_base }}/{{ item.path }}"
+    mode: "{{ item.mode }}"
+  with_filetree: ../templates/
+  become: true
+  notify: reload apache2 config
+  when: item.state == 'file'
+
+- name: Enable web resources
+  include_role:
+    name: semantiknit.web-enable-resources
+  vars:
+    web_sites_enabled: "{{ web_dispatcher_sites_enabled }}"
+    web_configs_enabled: "{{ web_dispatcher_configs_enabled }}"
+    web_mods_enabled: "{{ web_dispatcher_mods_enabled }}"

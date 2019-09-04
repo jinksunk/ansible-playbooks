@@ -10,6 +10,9 @@ all:
   children:
     deployhere:
       children:
+        webdispatchers:
+          hosts:
+            www.semantiknit.com
         dockerhosts:
           hosts:
             www.semantiknit.com

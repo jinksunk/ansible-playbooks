@@ -1,0 +1,26 @@
+---
+- name: Enable web modules
+  apache2_module:
+    state: present
+    name: "{{ item.name }}"
+  with_items: "{{ web_mods_enabled }}"
+  become: true
+  notify: reload apache2 config
+
+- name: Enable web configs
+  command:
+    argv:
+      - /usr/sbin/a2enconf
+      - "{{ item.name }}"
+  with_items: "{{ web_configs_enabled }}"
+  become: true
+  notify: reload apache2 config
+
+- name: Enable web sites
+  command:
+    argv:
+      - /usr/sbin/a2ensite
+      - "{{ item.name }}"
+  with_items: "{{ web_sites_enabled }}"
+  become: true
+  notify: reload apache2 config

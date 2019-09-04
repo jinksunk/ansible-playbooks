@@ -1,0 +1,57 @@
+---
+web_dispatcher_http_port: 80
+web_dispatcher_https_port: 443
+web_dispatcher_run_user: www-data
+web_dispatcher_run_group: www-data
+
+web_dispatcher_conf_base: /etc/apache2
+web_dispatcher_mods_available_dir: "{{ web_dispatcher_conf_base }}/mods-available"
+web_dispatcher_mods_enabled_dir: "{{ web_dispatcher_conf_base }}/mods-enabled"
+web_dispatcher_conf_available_dir: "{{ web_dispatcher_conf_base }}/conf-available"
+web_dispatcher_conf_enabled_dir: "{{ web_dispatcher_conf_base }}/conf-enabled"
+web_dispatcher_sites_available_dir: "{{ web_dispatcher_conf_base }}/sites-available"
+web_dispatcher_sites_enabled_dir: "{{ web_dispatcher_conf_base }}/sites-enabled"
+
+web_dispatcher_default_docroot: /var/www/html
+web_dispatcher_ports_file: "{{ web_dispatcher_conf_base }}/ports.conf"
+web_dispatcher_default_ssl_certificate_file: /etc/ssl/certs/ssl-cert-snakeoil.pem
+web_dispatcher_default_ssl_key_file: /etc/ssl/private/ssl-cert-snakeoil.key
+
+web_dispatcher_sites_enabled:
+  - { name: www-semantiknit-com }
+  - { name: www-semantiknit-com-ssl }
+web_dispatcher_configs_enabled:
+  - { name: charset }
+  - { name: javascript-common }
+  - { name: localized-error-pages }
+  - { name: other-vhosts-access-log }
+  - { name: security }
+  - { name: serve-cgi-bin }
+web_dispatcher_mods_enabled:
+  - { name: access_compat }
+  - { name: alias }
+  - { name: auth_basic }
+  - { name: authn_core }
+  - { name: authn_file }
+  - { name: authz_core }
+  - { name: authz_groupfile }
+  - { name: authz_host }
+  - { name: authz_user }
+  - { name: autoindex }
+  - { name: cgi }
+  - { name: deflate }
+  - { name: dir }
+  - { name: env }
+  - { name: filter }
+  - { name: headers }
+  - { name: mime }
+  - { name: mpm_prefork }
+  - { name: negotiation }
+  - { name: proxy }
+  - { name: proxy_http }
+  - { name: reqtimeout }
+  - { name: rewrite }
+  - { name: setenvif }
+  - { name: socache_shmcb }
+  - { name: ssl }
+  - { name: status }
