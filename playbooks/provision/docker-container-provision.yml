@@ -3,14 +3,166 @@
   connection: local
   gather_facts: True
   vars:
-    _image_base: "{{ ec2_availability_zone | default(ec2_default_az) }}"
+    _base_image_name: "{{ base_image_name | default( 'base_docker_image' ) }}"
+    _base_image_tag: "{{ base_image_tag | default( 'release' ) }}"
+    _docker_image_name: "{{ docker_image_name }}"
+    _docker_command_string: "{{ docker_command_string | default('/usr/sbin/sshd -D') }}"
     _docker_host: "{{ docker_host | default('unix://var/run/docker.sock') }}"
-    _dockerfile_path: "{{ dockerfile_path }}"
-    _name: "{{ docker_image_name }}"
-    _base_name: "{{ docker_base_image_name | default('') }}"
+    _docker_install_user: "{{ docker_install_user | default('sk_deploy') }}"
+    _docker_publish_ports: "{{ docker_publish_ports | default([]) }}"
+    _git_branch_name: "{{ git_branch_name | default('develop') }}"
+    _roles_to_apply: "{{ roles_to_apply | default([]) }}"
+    _image_tags: "{{ image_tags | default([]) }}"
 
   tasks:
-  - name: Build an image
-    docker_image:
-      path: "{{ _dockerfile_path }}"
-      name: "{{ _name }}"
+    - name: Check for develop tag
+      set_fact:
+        _image_tags: "{{ (_git_branch_name == 'develop') | ternary( _image_tags | union ( ['latest'] ), _image_tags ) }}"
+
+    - name: Check for master tag
+      set_fact:
+        _image_tags: "{{ (_git_branch_name == 'master') | ternary( _image_tags | union ( ['release'] ), _image_tags ) }}"
+
+    - name: Run docker image for build
+      command:
+        argv:
+          - docker
+          - run
+          - "--name=build_{{ _docker_image_name }}"
+          - --publish-all=true
+          - --detach
+          - "{{ _base_image_name }}:{{ _base_image_tag }}"
+      register: build_image_id
+
+    - name: Get exposed port on localhost
+      command:
+        argv:
+          - docker
+          - port
+          - "{{ build_image_id.stdout }}"
+          - "22"
+      register: build_image_ssh_port
+
+    - name: Add host to hosts list to process
+      add_host:
+        name: "127.0.0.1:{{ build_image_ssh_port.stdout.split(':')[1] }}"
+        groups: just_created
+
+- hosts: "just_created"
+  gather_facts: False
+  vars:
+    ansible_user: "{{ _docker_install_user }}"
+
+  roles: "{{ _roles_to_apply }}"
+
+- hosts: "{{ hosts | default('dockerhosts') }}"
+  gather_facts: false
+
+  tasks:
+    - name: create a docker image from the container
+      command:
+        argv:
+          - docker
+          - commit
+          - -c
+          - "EXPOSE {{ _docker_publish_ports | join(' ') }}"
+          - -c
+          - "{{ _docker_command_string }}"
+          - "build_{{ docker_image_name }}"
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+
+    - name: stop build container
+      command:
+        argv:
+          - docker
+          - stop
+          - "build_{{ docker_image_name }}"
+
+    - name: remove build container
+      command:
+        argv:
+          - docker
+          - rm
+          - "build_{{ docker_image_name }}"
+
+    - name: Remove existing tagged images if exist
+      shell: |
+        docker image rm \
+        "{{ docker_image_name }}:{{ item }}"
+      ignore_errors: yes
+      with_items: "{{ _image_tags }}"
+
+    - name: Add additional tags to image
+      shell: |
+        docker tag \
+        "{{ docker_image_name }}:{{ docker_image_tag }}" \
+        "{{ docker_image_name }}:{{ item }}"
+      with_items: "{{ _image_tags }}"
+
+    - name: stop existing tmp container if running
+      command:
+        argv:
+          - docker
+          - stop
+          - "{{ docker_image_name }}_tmp"
+      ignore_errors: yes
+
+    - name: remove existing tmp container if running
+      command:
+        argv:
+          - docker
+          - rm
+          - "{{ docker_image_name }}_tmp"
+      ignore_errors: yes
+
+
+    - name: Run docker image
+      command:
+        argv:
+          - docker
+          - run
+          - "--name={{ docker_image_name }}_tmp"
+          - --publish-all=true
+          - --detach
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+      register: published_image_id
+
+    - name: stop existing published container if running
+      command:
+        argv:
+          - docker
+          - stop
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: remove existing published container if running
+      command:
+        argv:
+          - docker
+          - rm
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: rename new published container
+      command:
+        argv:
+          - docker
+          - rename
+          - "{{ docker_image_name }}_tmp"
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: Get exposed ports on localhost
+      command:
+        argv:
+          - docker
+          - port
+          - "{{ published_image_id.stdout }}"
+          - "{{ item }}"
+      register: port_numbers
+      with_items: _docker_publish_ports
+
+    - name: debug ports using with_items (remove for deploy)
+      debug:
+        var: port_numbers
+
