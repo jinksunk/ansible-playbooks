@@ -48,7 +48,8 @@
         name: "127.0.0.1:{{ build_image_ssh_port.stdout.split(':')[1] }}"
         groups: just_created
 
-- hosts: "just_created"
+
+- hosts: just_created
   gather_facts: False
   vars:
     ansible_user: "{{ _docker_install_user }}"

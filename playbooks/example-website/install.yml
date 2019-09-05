@@ -1,6 +1,6 @@
 ---
 - name: Provision using docker playbook
-  include: ../provision/docker-container-provision.yml
+  import_playbook: ../provision/docker-container-provision.yml
   vars:
     docker_image_name: example_website
     docker_publish_ports:
