@@ -100,4 +100,77 @@
         "{{ docker_image_name }}:{{ item }}"
       with_items: "{{ image_tags }}"
 
+    - name: stop existing tmp container if running
+      command:
+        argv:
+          - docker
+          - stop
+          - "{{ docker_image_name }}_tmp"
+      ignore_errors: yes
+
+    - name: remove existing tmp container if running
+      command:
+        argv:
+          - docker
+          - rm
+          - "{{ docker_image_name }}_tmp"
+      ignore_errors: yes
+
+
+    - name: Run docker image
+      command:
+        argv:
+          - docker
+          - run
+          - "--name={{ docker_image_name }}_tmp"
+          - --publish-all=true
+          - --detach
+          - "{{ docker_image_name }}:{{ docker_image_tag }}"
+      register: published_image_id
+
+    - name: stop existing published container if running
+      command:
+        argv:
+          - docker
+          - stop
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: remove existing published container if running
+      command:
+        argv:
+          - docker
+          - rm
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: rename new published container
+      command:
+        argv:
+          - docker
+          - rename
+          - "{{ docker_image_name }}_tmp"
+          - "{{ docker_image_name }}"
+      ignore_errors: yes
+
+    - name: Get exposed port 80 on localhost
+      command:
+        argv:
+          - docker
+          - port
+          - "{{ published_image_id.stdout }}"
+          - "80"
+      register: image_http_port
+
+
+- hosts: webdispatchers
+  gather_facts: false
+  vars:
+    web_proxies_enabled:
+      - name: example-website
+        servername: localhost
+        portnum: "{{ image_http_port.stdout.split(':')[1]  }}"
+
+  roles:
+    - semantiknit.web-enable-resources
 

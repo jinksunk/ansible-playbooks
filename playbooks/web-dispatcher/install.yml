@@ -1,6 +1,10 @@
 ---
 - hosts: "{{ hosts | default('webdispatchers') }}"
   gather_facts: True
+  vars:
+    web_sites_enabled: "{{ web_dispatcher_sites_enabled }}"
+    web_configs_enabled: "{{ web_dispatcher_configs_enabled }}"
+    web_mods_enabled: "{{ web_dispatcher_mods_enabled }}"
 
   roles:
-    - semantiknit.web-dispatcher
+    - semantiknit.web-enable-resources
