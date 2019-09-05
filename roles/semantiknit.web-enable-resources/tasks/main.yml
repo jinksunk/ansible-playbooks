@@ -1,4 +1,13 @@
 ---
+- name: Call config template with parameters
+  include: template_new_web_config.yml
+  vars:
+    web_config_name: "{{ item.name }}"
+    web_server_hostname: "{{ item.servername }}"
+    web_server_port: "{{ item.portnum }}"
+  with_items: "{{ web_proxies_enabled }}"
+  when: item.servername is defined
+
 - name: Enable web modules
   apache2_module:
     state: present

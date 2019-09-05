@@ -1,0 +1,10 @@
+---
+
+- name: Template new web configs
+  template:
+    src: "{{ web_template_file }}"
+    dest: "{{ web_dispatcher_proxy_config_dir }}/{{ item.name }}.conf"
+    owner: "{{ web_dispatcher_run_user }}"
+    group: "{{ web_dispatcher_run_group }}"
+  notify: reload apache2 config
+  become: true

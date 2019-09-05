@@ -4,25 +4,29 @@
     path: "{{ web_dispatcher_conf_base }}/{{ item.path }}"
     state: directory
     mode: "{{ item.mode }}"
+    owner: "{{ web_dispatcher_run_user }}"
+    group: "{{ web_dispatcher_run_group }}"
   with_filetree: ../templates/
   become: true
   notify: reload apache2 config
   when: item.state == 'directory'
+
+- name: Create directory for proxy configs if needed
+  file:
+    path: "{{ web_dispatcher_proxy_config_dir }}"
+    state: directory
+    owner: "{{ web_dispatcher_run_user }}"
+    group: "{{ web_dispatcher_run_group }}"
+  become: true
 
 - name: Template config files
   template:
     src: "{{ item.path }}"
     dest: "{{ web_dispatcher_conf_base }}/{{ item.path }}"
     mode: "{{ item.mode }}"
+    owner: "{{ web_dispatcher_run_user }}"
+    group: "{{ web_dispatcher_run_group }}"
   with_filetree: ../templates/
   become: true
   notify: reload apache2 config
   when: item.state == 'file'
-
-- name: Enable web resources
-  include_role:
-    name: semantiknit.web-enable-resources
-  vars:
-    web_sites_enabled: "{{ web_dispatcher_sites_enabled }}"
-    web_configs_enabled: "{{ web_dispatcher_configs_enabled }}"
-    web_mods_enabled: "{{ web_dispatcher_mods_enabled }}"

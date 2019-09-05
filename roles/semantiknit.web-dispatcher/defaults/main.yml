@@ -1,10 +1,7 @@
 ---
 web_dispatcher_http_port: 80
 web_dispatcher_https_port: 443
-web_dispatcher_run_user: www-data
-web_dispatcher_run_group: www-data
 
-web_dispatcher_conf_base: /etc/apache2
 web_dispatcher_mods_available_dir: "{{ web_dispatcher_conf_base }}/mods-available"
 web_dispatcher_mods_enabled_dir: "{{ web_dispatcher_conf_base }}/mods-enabled"
 web_dispatcher_conf_available_dir: "{{ web_dispatcher_conf_base }}/conf-available"
