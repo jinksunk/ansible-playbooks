@@ -11,7 +11,6 @@
     _docker_install_user: "{{ docker_install_user | default('sk_deploy') }}"
     _docker_publish_ports: "{{ docker_publish_ports | default([]) }}"
     _git_branch_name: "{{ git_branch_name | default('develop') }}"
-    _roles_to_apply: "{{ roles_to_apply | default([]) }}"
     _image_tags: "{{ image_tags | default([]) }}"
 
   tasks:
@@ -53,9 +52,9 @@
   gather_facts: False
   vars:
     ansible_user: "{{ _docker_install_user }}"
+    _roles_to_apply: "{{ roles_to_apply | default([]) }}"
 
-  tasks:
-    - debug: var=ansible_user
+  roles: "{{ _roles_to_apply }}"
 
 - hosts: "{{ hosts | default('dockerhosts') }}"
   gather_facts: false
