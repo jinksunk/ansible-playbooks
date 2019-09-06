@@ -54,7 +54,8 @@
   vars:
     ansible_user: "{{ _docker_install_user }}"
 
-  roles: "{{ _roles_to_apply }}"
+  tasks:
+    - debug: var=ansible_user
 
 - hosts: "{{ hosts | default('dockerhosts') }}"
   gather_facts: false
